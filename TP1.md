@@ -71,12 +71,21 @@ REFERENCES COUNTRY(CODE);
 **Question 1.7**
 
 ```
+ALTER TABLE CITY
+ADD CONSTRAINT FK_PROVINCE_CITY
+FOREIGN KEY(PROVINCE, COUNTRY)
+REFERENCES PROVINCE(NAME, COUNTRY);
+```
+
+**Question 1.8**
+
+```
 ALTER TABLE BORDERS
 ADD CONSTRAINT CK_BORDERS_LENGTH_POSITIVE
 CHECK(LENGTH > 0);
 ```
 
-**Question 1.8**
+**Question 1.9**
 
 ```
 ALTER TABLE CITY
@@ -85,3 +94,74 @@ CHECK(LATITUDE <> LONGITUDE);
 ```
 
 # Problème 2
+
+**Question 2.1**
+
+```
+INSERT INTO COUNTRY (NAME, CODE, CAPITAL, PROVINCE, AREA, POPULATION)
+VALUES ('Basrit', 'BC', 'Demoi', 'Bascrit', 1250, 1250000);
+```
+
+-> Erreur
+
+<details>
+
+<summary>Solution 1 (pour l'utilisateur):</summary>
+1# Créer le pays sans capital et sans province
+
+```
+INSERT INTO COUNTRY (NAME, CODE, AREA, POPULATION)
+VALUES ('Bascrit', 'BC', 1250, 1250000);
+```
+
+2# Créer la province
+
+```
+INSERT INTO PROVINCE (AREA, CAPPROV, COUNTRY, NAME, POPULATION)
+VALUES (1250, 'Bascrit', 'BC', 'Bascrit', 1250000);
+```
+
+3# Créer la ville avec la province
+
+```
+INSERT INTO CITY (COUNTRY, NAME, PROVINCE)
+VALUES ('BC', 'Demoi', 'Bascrit');
+```
+
+4# Mettre à jour le pays et la province
+
+```
+UPDATE PROVINCE
+SET CAPITAL = 'Demoi'
+WHERE NAME = 'Bascrit' AND COUNTRY = 'BC';
+```
+
+```
+UPDATE COUNTRY
+SET CAPITAL = 'Demoi', PROVINCE = 'Bascrit'
+WHERE CODE = 'BC';
+```
+</details>
+
+<details>
+
+<summary>Solution 2 (pour l'administrateur):</summary>
+
+Supprimer les contraintes de clé étrangère sur Country
+Ou sur City et Province
+
+Puis éventuellement les remettre
+
+</details>
+
+<details>
+
+<summary>Solution 3 (pour l'administrateur):</summary>
+
+Mettre 'DEFERRABLE INITIALLY IMMEDIATE' sur la contrainte
+
+Utiliser 'ALTER SESSION SET CONSTRAINTS = DEFERRED;' avant l'insertion
+
+Puis 'ALTER SESSION SET CONSTRAINTS = IMMEDIATE;' après l'insertion
+
+</details>
