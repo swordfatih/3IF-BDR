@@ -4,6 +4,7 @@
 
 <details>
 Trouver les enregistrements qui n'ont pas de capital
+
 ```
 SELECT * FROM COUNTRY WHERE CAPITAL IS NULL;
 ```
