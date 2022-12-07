@@ -428,28 +428,43 @@ EXECUTE P_TEST();
 SELECT TABLE_NAME FROM user_tables;
 ```
 
+Donner les accès
 ```
 SELECT 'grant select, insert, update, delete on ' || TABLE_NAME || ' to acognot;' 
 FROM user_tables;
 ```
 
+Enlever les accès
+```
+SELECT 'revoke select, insert, update, delete on ' || TABLE_NAME || ' from acognot;' 
+FROM user_tables;
+```
+
+Appeler le script de génération
+```
+@H:\Documents\git\3IF-BDR\scriptGeneration.sql
+```
+
+scriptGeneration.sql
 ```
 SET ECHO OFF;
 SET FEEDBACK OFF;
-SET SERVEROUTPUT ON;
+SET SERVEROUTPUT OFF;
 SET VERIFY OFF;
 SET PAGES 0;
 SET HEAD OFF;
 
 -- redirection de la sortie standard
 
-SPOOL C:\Users\fkilic\Downloads\scriptGenereAuto.sql;
+SPOOL H:\Documents\git\3IF-BDR\scriptGenereAuto.sql;
 
-SELECT 'grant select, insert, update, delete on ' || TABLE_NAME || ' to acognot;' 
+SELECT 'revoke select, insert, update, delete on ' || TABLE_NAME || ' from acognot;' 
 FROM user_tables;
 
 SPOOL OFF;
 -- arrêt de la redirection
 
-@//C:\Users\fkilic\Downloads\scriptGenereAuto.sql;
+@H:\Documents\git\3IF-BDR\scriptGenereAuto.sql;
 ```
+
+**Question 2.2
