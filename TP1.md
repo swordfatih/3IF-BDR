@@ -283,5 +283,173 @@ WHERE INDEPENDENCE = NULL;
 **Question 2.9**
 
 ```
+CREATE OR REPLACE VIEW codes 
+AS (
+          SELECT Code
+          FROM COUNTRY
 
+          MINUS 
+
+          SELECT Country
+          FROM ISMEMBER
+);
+
+
+SELECT R.Code, C.Name
+FROM codes R 
+    JOIN COUNTRY C 
+    ON R.Code = C.Code;
+```
+
+**Question 2.10**
+
+```
+SELECT Code, Name, Organization
+FROM COUNTRY LEFT JOIN ISMEMBER ON Code = Country;
+```
+
+**Question 2.11**
+
+```
+SELECT E.Continent, sum(LENGTH) AS "somme en KM"
+FROM ENCOMPASSES E, COUNTRY, BORDERS
+WHERE COUNTRY.CODE = E.COUNTRY
+    
+    AND (
+          COUNTRY.CODE = BORDERS.COUNTRY1 
+            OR COUNTRY.CODE = BORDERS.COUNTRY2
+    )
+
+    AND COUNTRY1 IN (
+            SELECT Country 
+            FROM ENCOMPASSES E1
+            WHERE E1.Continent = E.Continent
+    )
+    AND COUNTRY2 IN (
+            SELECT Country 
+            FROM ENCOMPASSES E2
+            WHERE E2.Continent = E.Continent
+    )
+
+GROUP BY E.Continent;
+```
+
+**Question 2.17**
+
+1. 
+
+```
+SELECT Country FROM POPULATION;
+```
+
+Clé primaire : Country
+Type d'index : Full Scan
+
+2. 
+
+```
+SELECT * FROM POPULATION
+WHERE Country = 'F';
+```
+
+Oui, Unique Scan sur Country
+
+3.
+
+```
+SELECT * FROM POPULATION
+WHERE Country < 'F';
+```
+
+Oui, Range Scan
+
+4.
+
+```
+SELECT * FROM POPULATION
+WHERE population_growth = 0;
+```
+
+Non, pas d'index
+
+5.
+
+Oui, Range Scan sur population_growth
+
+6. 
+
+Bitmap Index (single value)
+
+7. 
+
+```
+SELECT * FROM POPULATION
+WHERE population_growth < 0;
+```
+
+Non, car le bitmap ne supporte pas les comparaisons autres qu’une égalité.
+
+**Question 2.18**
+
+```
+CREATE OR REPLACE FUNCTION F_NB_PAYS_FRONTALIER (
+    CODE_PAYS IN country.code%type
+)
+RETURN NUMBER
+IS
+    nb NUMBER;
+BEGIN
+    SELECT count(*) INTO nb
+    FROM BORDERS
+    WHERE COUNTRY1 = CODE_PAYS 
+        OR COUNTRY2 = CODE_PAYS
+    GROUP BY CODE_PAYS;
+
+    RETURN nb;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE P_TEST
+AS
+    nb number;
+BEGIN
+    nb := F_NB_PAYS_FRONTALIER('F');
+    DBMS_OUTPUT.PUT_LINE('Nombre total de pays frontaliers: ' || nb);
+END;
+/
+
+SELECT F_NB_PAYS_FRONTALIER('F') FROM DUAL;
+EXECUTE P_TEST();
+```
+
+**Question 2.27**
+
+```
+SELECT TABLE_NAME FROM user_tables;
+```
+
+```
+SELECT 'grant select, insert, update, delete on ' || TABLE_NAME || ' to acognot;' 
+FROM user_tables;
+```
+
+```
+SET ECHO OFF;
+SET FEEDBACK OFF;
+SET SERVEROUTPUT ON;
+SET VERIFY OFF;
+SET PAGES 0;
+SET HEAD OFF;
+
+-- redirection de la sortie standard
+
+SPOOL C:\Users\fkilic\Downloads\scriptGenereAuto.sql;
+
+SELECT 'grant select, insert, update, delete on ' || TABLE_NAME || ' to acognot;' 
+FROM user_tables;
+
+SPOOL OFF;
+-- arrêt de la redirection
+
+@//C:\Users\fkilic\Downloads\scriptGenereAuto.sql;
 ```
