@@ -467,4 +467,48 @@ SPOOL OFF;
 @H:\Documents\git\3IF-BDR\scriptGenereAuto.sql;
 ```
 
-**Question 2.2
+**Question 2.28**
+
+```
+CREATE OR REPLACE TRIGGER T_POLITICS_INDEPENDENT_DATE
+AFTER INSERT OR UPDATE ON POLITICS
+FOR EACH ROW
+BEGIN
+    IF :NEW.INDEPENDENCE <= CURRENT_DATE() THEN
+        RAISE_APPLICATION_ERROR(-20000, 'La date d indépendance doit être passé bg');
+    END IF;
+END;
+/
+```
+
+**Question 2.31**
+
+```
+ALTER TABLE Country
+ADD border_length NUMBER;
+
+UPDATE Country
+SET border_length = (
+        SELECT sum(Length) 
+        FROM Borders
+        WHERE Country1 = Country.Code OR Country2 = Country.Code
+);
+
+CREATE OR REPLACE TRIGGER T_COUNTRY_UPDATE_BORDERS
+AFTER INSERT OR UPDATE OR DELETE ON BORDERS
+FOR EACH ROW
+BEGIN
+    UPDATE COUNTRY 
+    SET border_length = border_length - :OLD.LENGTH + :NEW.LENGTH
+    WHERE Code = :NEW.Country1;
+
+    UPDATE COUNTRY 
+    SET border_length = border_length - :OLD.LENGTH + :NEW.LENGTH
+    WHERE Code = :NEW.Country2;
+END;
+/
+
+UPDATE BORDERS
+SET LENGTH = 10000
+WHERE Country1 = 'F' AND Country2 = 'UK';
+```
